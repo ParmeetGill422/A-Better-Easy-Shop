@@ -1,17 +1,16 @@
 package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.yearup.data.ProductDao;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.data.UserDao;
 import org.yearup.models.ShoppingCart;
+import org.yearup.models.ShoppingCartItem;
 import org.yearup.models.User;
+
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import java.security.Principal;
 
 @RestController
 @RequestMapping("/cart")
@@ -30,31 +29,32 @@ public class ShoppingCartController {
     @GetMapping
     public ShoppingCart getCart(Principal principal) {
         String username = principal.getName();
-        User user = userDao.getByUsername(username);
-        List<CartItem> items = shoppingCartDao.getCartByUserId(user.getUserId());
-        // Calculate total and return structured cart JSON
+        // Use the correct method name
+        User user = userDao.getByUserName(username);
+        List<ShoppingCartItem> items = shoppingCartDao.getCartByUserId(user.getId());
         return new ShoppingCart(items);
     }
 
     @PostMapping("/products/{productId}")
     public void addProductToCart(@PathVariable int productId, Principal principal) {
         String username = principal.getName();
-        User user = userDao.getByUsername(username);
-        shoppingCartDao.addProductToCart(user.getUserId(), productId);
+        int userId = userDao.getIdByUsername(username);
+        shoppingCartDao.addProductToCart(userId, productId);
     }
 
     @PutMapping("/products/{productId}")
     public void updateProductQuantity(@PathVariable int productId, @RequestBody Map<String, Integer> body, Principal principal) {
         int quantity = body.get("quantity");
         String username = principal.getName();
-        User user = userDao.getByUsername(username);
-        shoppingCartDao.updateProductQuantity(user.getUserId(), productId, quantity);
+        int userId = userDao.getIdByUsername(username);
+        shoppingCartDao.updateProductQuantity(userId, productId, quantity);
     }
 
     @DeleteMapping
     public void clearCart(Principal principal) {
         String username = principal.getName();
-        User user = userDao.getByUsername(username);
-        shoppingCartDao.clearCart(user.getUserId());
+        int userId = userDao.getIdByUsername(username);
+        shoppingCartDao.clearCart(userId);
     }
+
 }
