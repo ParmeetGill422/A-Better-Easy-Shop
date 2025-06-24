@@ -22,44 +22,52 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String color) {
         List<Product> products = new ArrayList<>();
 
-        String sql = "SELECT * FROM products " +
-                "WHERE (category_id = ? OR ? = -1) " +
-                "   AND (price >=? or ? = -1) "+
-                "   AND (price <= ? OR ? = -1) " +
-                "   AND (color = ? OR ? = '') ";
+        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
 
-        categoryId = categoryId == null ? -1 : categoryId;
-        minPrice = minPrice == null ? new BigDecimal("-1") : minPrice;
-        maxPrice = maxPrice == null ? new BigDecimal("-1") : maxPrice;
-        color = color == null ? "" : color;
+        if (categoryId != null) {
+            sql.append("AND category_id = ? ");
+            params.add(categoryId);
+        }
+        if (minPrice != null) {
+            sql.append("AND price >= ? ");
+            params.add(minPrice);
+        }
+        if (maxPrice != null) {
+            sql.append("AND price <= ? ");
+            params.add(maxPrice);
+        }
+        if (color != null && !color.isEmpty()) {
+            sql.append("AND color = ? ");
+            params.add(color);
+        }
 
-        try (Connection connection = getConnection())
-        {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
-            statement.setInt(2, categoryId);
-            statement.setBigDecimal(3, minPrice);
-            statement.setBigDecimal(4, minPrice);
-            statement.setBigDecimal(5, maxPrice);
-            statement.setBigDecimal(6, maxPrice);
-            statement.setString(7, color);
-            statement.setString(8, color);
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                Object param = params.get(i);
+                if (param instanceof Integer) {
+                    statement.setInt(i + 1, (Integer) param);
+                } else if (param instanceof BigDecimal) {
+                    statement.setBigDecimal(i + 1, (BigDecimal) param);
+                } else if (param instanceof String) {
+                    statement.setString(i + 1, (String) param);
+                }
+            }
 
             ResultSet row = statement.executeQuery();
 
-            while (row.next())
-            {
-                Product product = mapRow(row);
-                products.add(product);
+            while (row.next()) {
+                products.add(mapRow(row));
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
         return products;
     }
+
 
     @Override
     public List<Product> listByCategoryId(int categoryId)
@@ -115,15 +123,13 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     }
 
     @Override
-    public Product create(Product product)
-    {
+    public Product create(Product product) {
+        String sql = "INSERT INTO products (name, price, category_id, description, color, image_url, stock, featured) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        String sql = "INSERT INTO products(name, price, category_id, description, color, image_url, stock, featured) " +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-        try (Connection connection = getConnection())
-        {
-            PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
             statement.setString(1, product.getName());
             statement.setBigDecimal(2, product.getPrice());
             statement.setInt(3, product.getCategoryId());
@@ -136,24 +142,18 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
             int rowsAffected = statement.executeUpdate();
 
             if (rowsAffected > 0) {
-                // Retrieve the generated keys
                 ResultSet generatedKeys = statement.getGeneratedKeys();
-
                 if (generatedKeys.next()) {
-                    // Retrieve the auto-incremented ID
-                    int orderId = generatedKeys.getInt(1);
-
-                    // get the newly inserted category
-                    return getById(orderId);
+                    int newProductId = generatedKeys.getInt(1);
+                    return getById(newProductId);
                 }
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return null;
     }
+
 
     @Override
     public void update(int productId, Product product)

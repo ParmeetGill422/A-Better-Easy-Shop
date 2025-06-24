@@ -1,60 +1,52 @@
 package org.yearup.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.math.BigDecimal;
 
-public class ShoppingCartItem
-{
-    private Product product = null;
-    private int quantity = 1;
-    private BigDecimal discountPercent = BigDecimal.ZERO;
+public class ShoppingCartItem {
+    private Product product;
+    private int quantity;
+    private int discountPercent;
+    private BigDecimal lineTotal;
 
+    public ShoppingCartItem(Product product, int quantity) {
+        this.product = product;
+        this.quantity = quantity;
+        this.discountPercent = 0;
+        this.lineTotal = product.getPrice().multiply(new BigDecimal(quantity));
+    }
 
-    public Product getProduct()
-    {
+    // Getters and setters
+
+    public Product getProduct() {
         return product;
     }
 
-    public void setProduct(Product product)
-    {
+    public void setProduct(Product product) {
         this.product = product;
     }
 
-    public int getQuantity()
-    {
+    public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity)
-    {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
+        this.lineTotal = product.getPrice().multiply(new BigDecimal(quantity));
     }
 
-    public BigDecimal getDiscountPercent()
-    {
+    public int getDiscountPercent() {
         return discountPercent;
     }
 
-    public void setDiscountPercent(BigDecimal discountPercent)
-    {
+    public void setDiscountPercent(int discountPercent) {
         this.discountPercent = discountPercent;
     }
 
-    @JsonIgnore
-    public int getProductId()
-    {
-        return this.product.getProductId();
+    public BigDecimal getLineTotal() {
+        return lineTotal;
     }
 
-    public BigDecimal getLineTotal()
-    {
-        BigDecimal basePrice = product.getPrice();
-        BigDecimal quantity = new BigDecimal(this.quantity);
-
-        BigDecimal subTotal = basePrice.multiply(quantity);
-        BigDecimal discountAmount = subTotal.multiply(discountPercent);
-
-        return subTotal.subtract(discountAmount);
+    public void setLineTotal(BigDecimal lineTotal) {
+        this.lineTotal = lineTotal;
     }
 }
