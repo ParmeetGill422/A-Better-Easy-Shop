@@ -1,9 +1,7 @@
 package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.OrderDao;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.data.UserDao;
@@ -32,34 +30,31 @@ public class OrdersController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public Order createOrder(Principal principal) {
+
         String username = principal.getName();
         User user = userDao.getByUserName(username);
+        int userId = user.getId();
 
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
-        }
 
         List<ShoppingCartItem> cartItems = shoppingCartDao.getCartByUserId(user.getId());
-        if (cartItems == null || cartItems.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Shopping cart is empty");
+
+        if (cartItems.isEmpty()) {
+            throw new RuntimeException("Shopping cart is empty");
         }
 
-        // Create order object
+
         Order order = new Order();
         order.setUserId(user.getId());
         order.setOrderDate(LocalDateTime.now());
-
-        // Save order to get order ID
         Order createdOrder = orderDao.create(order);
 
-        // Add each cart item as order line item
+
         for (ShoppingCartItem item : cartItems) {
             orderDao.addOrderLineItem(createdOrder.getOrderId(), item.getProduct().getProductId(), item.getQuantity());
         }
 
-        // Clear shopping cart
+
         shoppingCartDao.clearCart(user.getId());
 
         return createdOrder;
