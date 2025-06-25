@@ -1,9 +1,8 @@
 package org.yearup.data.mysql;
 
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
-import org.yearup.models.Profile;
 import org.yearup.data.ProfileDao;
+import org.yearup.models.Profile;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -20,12 +19,12 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
     public Profile create(Profile profile)
     {
         String sql = "INSERT INTO profiles (user_id, first_name, last_name, phone, email, address, city, state, zip) " +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try(Connection connection = getConnection())
+        try(Connection connection = getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql))
         {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setInt(1, getByUserId());
+            ps.setInt(1, profile.getUserId());
             ps.setString(2, profile.getFirstName());
             ps.setString(3, profile.getLastName());
             ps.setString(4, profile.getPhone());
@@ -46,32 +45,41 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
     }
 
     @Override
-    public Profile getByUserId(int userId) {
+    public Profile getByUserId(int userId)
+    {
         String sql = "SELECT * FROM profiles WHERE user_id = ?";
 
         try (Connection connection = getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-
+             PreparedStatement ps = connection.prepareStatement(sql))
+        {
             ps.setInt(1, userId);
 
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
+
+            if (rs.next())
+            {
                 return mapRow(rs);
             }
-        } catch (SQLException e) {
+            else
+            {
+                return null;
+            }
+        }
+        catch (SQLException e)
+        {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 
     @Override
-    public void update(int userId, Profile profile) {
-        String sql = "UPDATE profiles SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, city = ?, state = ?, zip = ? WHERE user_id = ?";
+    public void update(Profile profile)
+    {
+        String sql = "UPDATE profiles SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, city = ?, state = ?, zip = ? " +
+                "WHERE user_id = ?";
 
         try (Connection connection = getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-
+             PreparedStatement ps = connection.prepareStatement(sql))
+        {
             ps.setString(1, profile.getFirstName());
             ps.setString(2, profile.getLastName());
             ps.setString(3, profile.getPhone());
@@ -80,15 +88,20 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
             ps.setString(6, profile.getCity());
             ps.setString(7, profile.getState());
             ps.setString(8, profile.getZip());
-            ps.setInt(9, userId);
+            ps.setInt(9, profile.getUserId());
 
             ps.executeUpdate();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             throw new RuntimeException(e);
         }
     }
-    private Profile mapRow(ResultSet row) throws SQLException {
+
+    private Profile mapRow(ResultSet row) throws SQLException
+    {
         Profile profile = new Profile();
+
         profile.setUserId(row.getInt("user_id"));
         profile.setFirstName(row.getString("first_name"));
         profile.setLastName(row.getString("last_name"));
@@ -98,7 +111,7 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
         profile.setCity(row.getString("city"));
         profile.setState(row.getString("state"));
         profile.setZip(row.getString("zip"));
+
         return profile;
     }
-
 }
