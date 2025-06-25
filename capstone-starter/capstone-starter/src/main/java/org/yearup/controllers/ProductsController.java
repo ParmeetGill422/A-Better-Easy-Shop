@@ -61,6 +61,11 @@ public class ProductsController
         }
     }
 
+    @GetMapping("/duplicates")
+    public List<String> findDuplicateProductNames() {
+        return productDao.findDuplicateProductNames();
+    }
+
     @PostMapping()
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Product addProduct(@RequestBody Product product)
@@ -107,10 +112,4 @@ public class ProductsController
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
     }
-    @GetMapping("/products/duplicates")  //
-    public List<String> getDuplicateProductNames() {
-        return productDao.findDuplicateProductNames();
-    }
-
-
 }
