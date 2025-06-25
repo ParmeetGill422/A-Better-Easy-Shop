@@ -54,6 +54,7 @@ public class CategoriesController {
     // POST /categories - Only ADMIN
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
     public Category addCategory(@RequestBody Category category) {
         return categoryDao.create(category);
     }
@@ -68,6 +69,7 @@ public class CategoriesController {
     // DELETE /categories/{id} - Only ADMIN
     @DeleteMapping("{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable int id) {
         categoryDao.delete(id);
     }
