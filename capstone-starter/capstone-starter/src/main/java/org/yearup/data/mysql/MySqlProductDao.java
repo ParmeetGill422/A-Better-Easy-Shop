@@ -224,4 +224,22 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
 
         return new Product(productId, name, price, categoryId, description, color, stock, isFeatured, imageUrl);
     }
+
+    public List<String> findDuplicateProductNames() {
+        List<String> duplicates = new ArrayList<>();
+        String sql = "SELECT name FROM products GROUP BY name HAVING COUNT(*) > 1";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+
+            while (rs.next()) {
+                duplicates.add(rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return duplicates;
+    }
+
 }
