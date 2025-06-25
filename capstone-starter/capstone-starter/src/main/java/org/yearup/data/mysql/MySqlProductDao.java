@@ -1,6 +1,7 @@
 package org.yearup.data.mysql;
 
 import org.springframework.stereotype.Component;
+import org.yearup.models.DuplicateProduct;
 import org.yearup.models.Product;
 import org.yearup.data.ProductDao;
 
@@ -96,6 +97,11 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         }
 
         return products;
+    }
+
+    @Override
+    public List<DuplicateProduct> findDuplicateProducts() {
+        return List.of();
     }
 
 
