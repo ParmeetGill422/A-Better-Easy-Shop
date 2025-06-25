@@ -1,5 +1,6 @@
 package org.yearup.data.mysql;
 
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 import org.yearup.models.Profile;
 import org.yearup.data.ProfileDao;
@@ -23,8 +24,8 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
 
         try(Connection connection = getConnection())
         {
-            PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, profile.getUserId());
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, getByUserId());
             ps.setString(2, profile.getFirstName());
             ps.setString(3, profile.getLastName());
             ps.setString(4, profile.getPhone());
