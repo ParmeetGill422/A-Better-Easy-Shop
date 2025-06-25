@@ -1,6 +1,8 @@
 package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.yearup.data.OrderDao;
 import org.yearup.data.ShoppingCartDao;
@@ -10,7 +12,6 @@ import org.yearup.models.ShoppingCartItem;
 import org.yearup.models.User;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -30,33 +31,40 @@ public class OrdersController {
     }
 
     @PostMapping
-    public Order createOrder(Principal principal) {
+    public ResponseEntity<Order> createOrder(Principal principal) {
+        try {
+            if (principal == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
 
-        String username = principal.getName();
-        User user = userDao.getByUserName(username);
-        int userId = user.getId();
+            String username = principal.getName();
+            User user = userDao.getByUserName(username);
 
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
 
-        List<ShoppingCartItem> cartItems = shoppingCartDao.getCartByUserId(user.getId());
+            List<ShoppingCartItem> cartItems = shoppingCartDao.getCartByUserId(user.getId());
+            if (cartItems.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
 
-        if (cartItems.isEmpty()) {
-            throw new RuntimeException("Shopping cart is empty");
+            Order order = new Order();
+            order.setUserId(user.getId());
+
+            Order createdOrder = orderDao.create(order);
+
+            for (ShoppingCartItem item : cartItems) {
+                orderDao.addOrderLineItem(createdOrder.getOrderId(), item.getProduct().getProductId(), item.getQuantity());
+            }
+
+            shoppingCartDao.clearCart(user.getId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-
-        Order order = new Order();
-        order.setUserId(user.getId());
-        order.setOrderDate(LocalDateTime.now());
-        Order createdOrder = orderDao.create(order);
-
-
-        for (ShoppingCartItem item : cartItems) {
-            orderDao.addOrderLineItem(createdOrder.getOrderId(), item.getProduct().getProductId(), item.getQuantity());
-        }
-
-
-        shoppingCartDao.clearCart(user.getId());
-
-        return createdOrder;
     }
 }
