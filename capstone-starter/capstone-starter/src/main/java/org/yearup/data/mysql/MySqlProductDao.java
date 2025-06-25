@@ -1,7 +1,7 @@
 package org.yearup.data.mysql;
 
 import org.springframework.stereotype.Component;
-import org.yearup.models.DuplicateProduct;
+
 import org.yearup.models.Product;
 import org.yearup.data.ProductDao;
 
@@ -99,9 +99,6 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         return products;
     }
 
-    public List<DuplicateProduct> findDuplicateProducts() {
-        return List.of();
-    }
 
     @Override
     public Product getById(int productId)
@@ -229,10 +226,10 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         return new Product(productId, name, price, categoryId, description, color, stock, isFeatured, imageUrl);
     }
 
-    @Override
     public List<String> findDuplicateProductNames() {
-        List<String> duplicates = new ArrayList<>();
         String sql = "SELECT name FROM products GROUP BY name HAVING COUNT(*) > 1";
+
+        List<String> duplicates = new ArrayList<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
@@ -241,9 +238,11 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
             while (rs.next()) {
                 duplicates.add(rs.getString("name"));
             }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
         return duplicates;
     }
 
