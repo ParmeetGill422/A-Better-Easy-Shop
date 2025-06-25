@@ -1,7 +1,6 @@
 package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +24,7 @@ public class ProfileController {
         this.profileDao = profileDao;
     }
 
+
     @GetMapping
     public Profile getProfile(Authentication authentication) {
         String username = authentication.getName();
@@ -42,6 +42,8 @@ public class ProfileController {
 
         return profile;
     }
+
+
     @PutMapping
     public void updateProfile(@RequestBody Profile profile, Authentication authentication) {
         String username = authentication.getName();
