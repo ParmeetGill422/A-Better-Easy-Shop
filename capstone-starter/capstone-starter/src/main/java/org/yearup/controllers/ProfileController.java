@@ -42,4 +42,15 @@ public class ProfileController {
 
         return profile;
     }
+    @PutMapping
+    public void updateProfile(@RequestBody Profile profile, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userDao.getByUserName(username);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        profileDao.update(user.getUserId(), profile);
+    }
 }
