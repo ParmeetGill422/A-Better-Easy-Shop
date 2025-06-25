@@ -107,4 +107,10 @@ public class ProductsController
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
     }
+    @GetMapping("/products/duplicates")  //
+    public List<String> getDuplicateProductNames() {
+        return productDao.findDuplicateProductNames();
+    }
+
+
 }
