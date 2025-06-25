@@ -87,5 +87,18 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
             throw new RuntimeException(e);
         }
     }
+    private Profile mapRow(ResultSet row) throws SQLException {
+        Profile profile = new Profile();
+        profile.setUserId(row.getInt("user_id"));
+        profile.setFirstName(row.getString("first_name"));
+        profile.setLastName(row.getString("last_name"));
+        profile.setPhone(row.getString("phone"));
+        profile.setEmail(row.getString("email"));
+        profile.setAddress(row.getString("address"));
+        profile.setCity(row.getString("city"));
+        profile.setState(row.getString("state"));
+        profile.setZip(row.getString("zip"));
+        return profile;
+    }
 
 }
