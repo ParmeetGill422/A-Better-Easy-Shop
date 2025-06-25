@@ -62,10 +62,11 @@ public class ProductsController
         }
     }
 
-    @GetMapping("/duplicates")
-    public List<DuplicateProduct> findDuplicateProducts() {
-        return productDao.findDuplicateProducts();
+    @GetMapping("/products/duplicates")
+    public List<String> getDuplicateProductNames() {
+        return productDao.findDuplicateProductNames();
     }
+
 
     @PostMapping()
     @PreAuthorize("hasRole('ROLE_ADMIN')")

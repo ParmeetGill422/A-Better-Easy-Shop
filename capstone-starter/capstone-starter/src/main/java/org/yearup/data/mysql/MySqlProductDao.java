@@ -99,11 +99,9 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         return products;
     }
 
-    @Override
     public List<DuplicateProduct> findDuplicateProducts() {
         return List.of();
     }
-
 
     @Override
     public Product getById(int productId)
@@ -231,6 +229,7 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         return new Product(productId, name, price, categoryId, description, color, stock, isFeatured, imageUrl);
     }
 
+    @Override
     public List<String> findDuplicateProductNames() {
         List<String> duplicates = new ArrayList<>();
         String sql = "SELECT name FROM products GROUP BY name HAVING COUNT(*) > 1";
@@ -247,5 +246,6 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         }
         return duplicates;
     }
+
 
 }
