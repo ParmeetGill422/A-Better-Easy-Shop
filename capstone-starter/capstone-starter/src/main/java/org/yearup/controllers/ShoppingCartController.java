@@ -1,6 +1,7 @@
 package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.data.UserDao;
@@ -27,6 +28,7 @@ public class ShoppingCartController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ShoppingCart getCart(Principal principal) {
         String username = principal.getName();
         // Use the correct method name
@@ -36,13 +38,18 @@ public class ShoppingCartController {
     }
 
     @PostMapping("/products/{productId}")
-    public void addProductToCart(@PathVariable int productId, Principal principal) {
+    @PreAuthorize("hasRole('ROLE_USER')")
+
+    public ShoppingCart addProductToCart(@PathVariable int productId, Principal principal) {
         String username = principal.getName();
         int userId = userDao.getIdByUsername(username);
         shoppingCartDao.addProductToCart(userId, productId);
+        return new ShoppingCart(shoppingCartDao.getCartByUserId(userId));
     }
 
     @PutMapping("/products/{productId}")
+    @PreAuthorize("hasRole('ROLE_USER')")
+
     public void updateProductQuantity(@PathVariable int productId, @RequestBody Map<String, Integer> body, Principal principal) {
         int quantity = body.get("quantity");
         String username = principal.getName();
@@ -51,10 +58,13 @@ public class ShoppingCartController {
     }
 
     @DeleteMapping
-    public void clearCart(Principal principal) {
+    @PreAuthorize("hasRole('ROLE_USER')")
+
+    public ShoppingCart clearCart(Principal principal) {
         String username = principal.getName();
         int userId = userDao.getIdByUsername(username);
         shoppingCartDao.clearCart(userId);
+        return new ShoppingCart(shoppingCartDao.getCartByUserId(userId));
     }
 
 }
