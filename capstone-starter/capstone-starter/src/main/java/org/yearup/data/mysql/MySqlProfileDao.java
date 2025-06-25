@@ -1,5 +1,6 @@
 package org.yearup.data.mysql;
 
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 import org.yearup.models.Profile;
 import org.yearup.data.ProfileDao;
@@ -24,7 +25,7 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
         try(Connection connection = getConnection())
         {
             PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setInt(1, profile.getUserId());
+            ps.setInt(1, getByUserId());
             ps.setString(2, profile.getFirstName());
             ps.setString(3, profile.getLastName());
             ps.setString(4, profile.getPhone());
@@ -86,7 +87,6 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
             throw new RuntimeException(e);
         }
     }
-
     private Profile mapRow(ResultSet row) throws SQLException {
         Profile profile = new Profile();
         profile.setUserId(row.getInt("user_id"));
@@ -100,4 +100,5 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
         profile.setZip(row.getString("zip"));
         return profile;
     }
+
 }

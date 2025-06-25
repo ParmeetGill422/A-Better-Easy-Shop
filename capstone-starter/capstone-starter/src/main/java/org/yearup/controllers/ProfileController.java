@@ -10,6 +10,8 @@ import org.yearup.data.UserDao;
 import org.yearup.models.Profile;
 import org.yearup.models.User;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/profile")
 @CrossOrigin
@@ -24,35 +26,26 @@ public class ProfileController {
         this.profileDao = profileDao;
     }
 
-
     @GetMapping
-    public Profile getProfile(Authentication authentication) {
-        String username = authentication.getName();
+    public Profile getProfile(Principal principal) {
+        String username = principal.getName();
         User user = userDao.getByUserName(username);
-
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
-
-        Profile profile = profileDao.getByUserId(user.getUserId());
-
-        if (profile == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
-        }
-
-        return profile;
+        return profileDao.getByUserId(user.getId());
     }
-
 
     @PutMapping
-    public void updateProfile(@RequestBody Profile profile, Authentication authentication) {
-        String username = authentication.getName();
+    public Profile updateProfile(@RequestBody Profile profile, Principal principal) {
+        String username = principal.getName();
         User user = userDao.getByUserName(username);
-
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
-
-        profileDao.update(user.getUserId(), profile);
+        profile.setUserId(user.getId());
+        profileDao.update(profile);
+        return profile;
     }
 }
+
