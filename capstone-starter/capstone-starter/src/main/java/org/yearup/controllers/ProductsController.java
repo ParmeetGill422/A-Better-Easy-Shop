@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.yearup.models.DuplicateProduct;
 import org.yearup.models.Product;
 import org.yearup.data.ProductDao;
 
@@ -62,8 +63,8 @@ public class ProductsController
     }
 
     @GetMapping("/duplicates")
-    public List<String> findDuplicateProductNames() {
-        return productDao.findDuplicateProductNames();
+    public List<DuplicateProduct> findDuplicateProducts() {
+        return productDao.findDuplicateProducts();
     }
 
     @PostMapping()
