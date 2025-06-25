@@ -62,7 +62,7 @@ public class ProductsController
         }
     }
 
-    @GetMapping("/products/duplicates")
+    @GetMapping("/duplicates/names")
     public List<String> findDuplicateProductNames() {
         return productDao.findDuplicateProductNames();
     }
