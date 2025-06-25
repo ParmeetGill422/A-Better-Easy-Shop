@@ -20,19 +20,26 @@ public class ProfileController {
     private final ProfileDao profileDao;
 
     @Autowired
-    public PrfileController(UserDao userDao, ProfileDao profileDao){
+    public ProfileController(UserDao userDao, ProfileDao profileDao) {
         this.userDao = userDao;
         this.profileDao = profileDao;
     }
 
     @GetMapping
-    public Profile getProfile(Authentication authentication){
+    public Profile getProfile(Authentication authentication) {
         String username = authentication.getName();
         User user = userDao.getByUserName(username);
 
-        if (user == null){
+        if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
-        Profile profile = profileDao.getByUserId(user.get)
+
+        Profile profile = profileDao.getByUserId(user.getUserId());
+
+        if (profile == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
+        }
+
+        return profile;
     }
 }
