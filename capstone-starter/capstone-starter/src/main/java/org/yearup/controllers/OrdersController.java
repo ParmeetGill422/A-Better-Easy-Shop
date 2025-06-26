@@ -5,12 +5,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.yearup.data.OrderDao;
+import org.yearup.data.ProfileDao;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.data.UserDao;
 import org.yearup.models.Order;
+import org.yearup.models.Profile;
 import org.yearup.models.ShoppingCartItem;
 import org.yearup.models.User;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.security.Principal;
 import java.util.List;
 
@@ -20,12 +24,18 @@ import java.util.List;
 public class OrdersController {
 
     private final UserDao userDao;
+    private final ProfileDao profileDao;
     private final ShoppingCartDao shoppingCartDao;
     private final OrderDao orderDao;
 
     @Autowired
-    public OrdersController(UserDao userDao, ShoppingCartDao shoppingCartDao, OrderDao orderDao) {
+    public OrdersController(
+            UserDao userDao,
+            ProfileDao profileDao,
+            ShoppingCartDao shoppingCartDao,
+            OrderDao orderDao) {
         this.userDao = userDao;
+        this.profileDao = profileDao;
         this.shoppingCartDao = shoppingCartDao;
         this.orderDao = orderDao;
     }
@@ -49,13 +59,25 @@ public class OrdersController {
                 return ResponseEntity.badRequest().build();
             }
 
+            Profile profile = profileDao.getByUserId(user.getId());
+            if (profile == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
             Order order = new Order();
             order.setUserId(user.getId());
+            order.setDate(LocalDateTime.now());
+            order.setAddress(profile.getAddress());
+            order.setCity(profile.getCity());
+            order.setState(profile.getState());
+            order.setZip(profile.getZip());
+            order.setShippingAmount(BigDecimal.ZERO);
 
             Order createdOrder = orderDao.create(order);
 
             for (ShoppingCartItem item : cartItems) {
-                orderDao.addOrderLineItem(createdOrder.getOrderId(), item.getProduct().getProductId(), item.getQuantity());
+                BigDecimal price = item.getProduct().getPrice();  // Assuming product has getPrice()
+                orderDao.addOrderLineItem(createdOrder.getOrderId(), item.getProduct().getProductId(), item.getQuantity(), price);
             }
 
             shoppingCartDao.clearCart(user.getId());
