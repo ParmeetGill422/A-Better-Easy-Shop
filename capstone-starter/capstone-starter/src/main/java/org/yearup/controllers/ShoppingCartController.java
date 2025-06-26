@@ -50,11 +50,12 @@ public class ShoppingCartController {
     @PutMapping("/products/{productId}")
     @PreAuthorize("hasRole('ROLE_USER')")
 
-    public void updateProductQuantity(@PathVariable int productId, @RequestBody Map<String, Integer> body, Principal principal) {
+    public ShoppingCart updateProductQuantity(@PathVariable int productId, @RequestBody Map<String, Integer> body, Principal principal) {
         int quantity = body.get("quantity");
         String username = principal.getName();
         int userId = userDao.getIdByUsername(username);
         shoppingCartDao.updateProductQuantity(userId, productId, quantity);
+        return new ShoppingCart(shoppingCartDao.getCartByUserId(userId));
     }
 
     @DeleteMapping
