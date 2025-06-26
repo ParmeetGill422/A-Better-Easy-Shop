@@ -44,8 +44,24 @@ Responsive user interface using vanilla JavaScript, Axios for API calls, and Boo
 ## 📸 Screenshots
 
 ### 🏠 Home Screen 
+
+![Home screeen](https://github.com/user-attachments/assets/dd030cae-de10-473f-b713-4b009383c0bc)
+
 ### 🛒 Cart Screen
-### Postman
+
+![Cart screen](https://github.com/user-attachments/assets/1bd9543f-df1f-418d-8b28-5ffa5fdf9379)
+
+### 📬 Postman
+
+![postman screen](https://github.com/user-attachments/assets/e2b74b72-5643-48d4-a25a-e56bb7e402ae)
+
+### 🧍‍♂️ Login
+
+![Login screen](https://github.com/user-attachments/assets/7e44c99d-82fc-41cb-9129-7a19115b308e)
+
+### 🎭 Profile
+
+![Profile screen](https://github.com/user-attachments/assets/32f8c43e-59c5-4a5a-b673-d1f5441e41c3)
 
 ---
 
