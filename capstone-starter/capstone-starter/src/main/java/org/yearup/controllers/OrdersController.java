@@ -76,7 +76,7 @@ public class OrdersController {
             Order createdOrder = orderDao.create(order);
 
             for (ShoppingCartItem item : cartItems) {
-                BigDecimal price = item.getProduct().getPrice();  // Assuming product has getPrice()
+                BigDecimal price = item.getProduct().getPrice();
                 orderDao.addOrderLineItem(createdOrder.getOrderId(), item.getProduct().getProductId(), item.getQuantity(), price);
             }
 

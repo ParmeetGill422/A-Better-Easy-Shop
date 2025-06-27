@@ -10,7 +10,7 @@ public class ShoppingCart {
     private Map<Integer, ShoppingCartItem> items = new HashMap<>();
     private BigDecimal total = BigDecimal.ZERO;
 
-    // Constructor that accepts a list of ShoppingCartItem objects
+
     public ShoppingCart(List<ShoppingCartItem> itemsList) {
         for (ShoppingCartItem item : itemsList) {
             items.put(item.getProduct().getProductId(), item);
