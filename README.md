@@ -6,7 +6,7 @@
 
 This  is e-commerce web application that enables users to browse, select, and purchase products online with ease. It includes secure user authentication and role-based authorization, allowing different levels of access for regular customers and administrators. Users can filter products by category and price, manage their shopping cart by adding or removing items.
 
-The backend API is developed with Java Spring Boot, providing robust RESTful endpoints secured by JWT tokens. The frontend is built using JavaScript with Axios for API communication, delivering a smooth and responsive user interface.
+The backend API is developed with Java Spring Boot, providing robust RESTful endpoints secured by JWT tokens. The frontend is built using JavaScript for API communication, delivering a smooth and responsive user interface.
 
 ---
 
@@ -25,7 +25,7 @@ Logged-in users can add products to a persistent cart, update quantities, and cl
 
 - 📦 **Order Management**
 
-Users can place orders from their cart. Administrators can manage products and orders.
+Users can place orders from their cart.
 
 - 🌐 **RESTful API**
 
@@ -35,9 +35,6 @@ Backend exposes REST endpoints for frontend consumption, with Spring Security en
 
 Data persistence handled via MySQL, including user data, products, carts, and orders.
 
-- 🖥️ **Frontend**
-
-Responsive user interface using vanilla JavaScript, Axios for API calls, and Bootstrap for styling.
 
 ---
 
