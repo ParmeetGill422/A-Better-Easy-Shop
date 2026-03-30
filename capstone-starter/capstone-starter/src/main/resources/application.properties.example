@@ -1,0 +1,14 @@
+## Copy this file to application.properties and fill in your own values.
+## application.properties is intentionally excluded from git (.gitignore)
+## to prevent credentials from being committed to the repository.
+
+datasource.url=jdbc:mysql://localhost:3306/easyshop?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+datasource.username=YOUR_DB_USERNAME
+datasource.password=YOUR_DB_PASSWORD
+
+## Generate a strong random secret for JWT signing.
+## Example (Linux/Mac): openssl rand -base64 64
+jwt.secret=REPLACE_WITH_A_STRONG_RANDOM_SECRET
+jwt.token-timeout-seconds=108000
+
+#server.port=8080
