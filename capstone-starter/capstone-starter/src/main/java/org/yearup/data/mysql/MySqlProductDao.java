@@ -78,17 +78,17 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         String sql = "SELECT * FROM products " +
                     " WHERE category_id = ? ";
 
-        try (Connection connection = getConnection())
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql))
         {
-            PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, categoryId);
 
-            ResultSet row = statement.executeQuery();
-
-            while (row.next())
+            try (ResultSet row = statement.executeQuery())
             {
-                Product product = mapRow(row);
-                products.add(product);
+                while (row.next())
+                {
+                    products.add(mapRow(row));
+                }
             }
         }
         catch (SQLException e)
@@ -104,16 +104,17 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     public Product getById(int productId)
     {
         String sql = "SELECT * FROM products WHERE product_id = ?";
-        try (Connection connection = getConnection())
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql))
         {
-            PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, productId);
 
-            ResultSet row = statement.executeQuery();
-
-            if (row.next())
+            try (ResultSet row = statement.executeQuery())
             {
-                return mapRow(row);
+                if (row.next())
+                {
+                    return mapRow(row);
+                }
             }
         }
         catch (SQLException e)
@@ -170,9 +171,9 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
                 "   , featured = ? " +
                 " WHERE product_id = ?;";
 
-        try (Connection connection = getConnection())
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql))
         {
-            PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, product.getName());
             statement.setBigDecimal(2, product.getPrice());
             statement.setInt(3, product.getCategoryId());
@@ -194,15 +195,13 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     @Override
     public void delete(int productId)
     {
-
         String sql = "DELETE FROM products " +
                 " WHERE product_id = ?;";
 
-        try (Connection connection = getConnection())
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql))
         {
-            PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, productId);
-
             statement.executeUpdate();
         }
         catch (SQLException e)
