@@ -2,148 +2,85 @@
 let userService;
 
 class UserService {
+
     currentUser = {};
 
-    constructor()
-    {
+    constructor() {
         this.loadUser();
     }
 
-    getHeader()
-    {
-        if(this.currentUser.token) {
-            return {
-                    'Authorization': `Bearer ${this.currentUser.token}`
-            };
-        }
-
-        return {};
+    _getAuthHeader() {
+        return this.currentUser.token
+            ? { Authorization: `Bearer ${this.currentUser.token}` }
+            : {};
     }
 
-    saveUser(user)
-    {
+    getHeaders() {
+        return { 'Content-Type': 'application/json', ...this._getAuthHeader() };
+    }
+
+    saveUser(user) {
         this.currentUser = {
-            token: user.token,
-            userId: user.user.id,
+            token:    user.token,
+            userId:   user.user.id,
             username: user.user.username,
-            role: user.user.authorities[0].name
-        }
+            role:     user.user.authorities[0].name
+        };
         localStorage.setItem('user', JSON.stringify(this.currentUser));
     }
 
-    loadUser()
-    {
-        const user = localStorage.getItem('user');
-        if(user)
-        {
-            this.currentUser = JSON.parse(user);
-            axios.defaults.headers.common = {'Authorization': `Bearer ${this.currentUser.token}`}
+    loadUser() {
+        const raw = localStorage.getItem('user');
+        if (raw) {
+            this.currentUser = JSON.parse(raw);
+            axios.defaults.headers.common = this._getAuthHeader();
         }
     }
 
-    getHeaders()
-    {
-        const headers = {
-            'Content-Type': 'application/json'
-        }
+    getUserName()    { return this.isLoggedIn() ? this.currentUser.username : ''; }
+    isLoggedIn()     { return this.currentUser.token !== undefined; }
+    getCurrentUser() { return this.currentUser; }
 
-        if(this.currentUser.token)
-        {
-            headers.Authorization = `Bearer ${this.currentUser.token}`;
-        }
-
-        return headers;
+    setHeaderLogin() {
+        templateBuilder.build('header', {
+            username:  this.getUserName(),
+            loggedin:  this.isLoggedIn(),
+            loggedout: !this.isLoggedIn()
+        }, 'header-user');
     }
 
-    getUserName()
-    {
-        return this.isLoggedIn() ? this.currentUser.username : '';
-    }
-
-    isLoggedIn()
-    {
-        return this.currentUser.token !== undefined;
-    }
-
-    getCurrentUser()
-    {
-        return this.currentUser;
-    }
-
-    setHeaderLogin()
-    {
-        const user = {
-                username: this.getUserName(),
-                loggedin: this.isLoggedIn(),
-                loggedout: !this.isLoggedIn()
-            };
-
-        templateBuilder.build('header', user, 'header-user');
-    }
-
-    register (username, password, confirm)
-    {
-        const url = `${config.baseUrl}/register`;
-        const register = {
-            username: username,
-            password: password,
-            confirmPassword: confirm,
-            role: 'USER'
-        };
-
-        axios.post(url, register)
-             .then(response => {
-                 console.log(response.data)
-             })
-            .catch(error => {
-
-                const data = {
-                    error: "User registration failed."
-                };
-
-                templateBuilder.append("error", data, "errors")
-            });
-    }
-
-    login (username, password)
-    {
-        const url = `${config.baseUrl}/login`;
-        const login = {
-            username: username,
-            password: password
-        };
-
-        axios.post(url, login)
+    login(username, password) {
+        axios.post(`${config.baseUrl}/login`, { username, password })
             .then(response => {
-                this.saveUser(response.data)
+                this.saveUser(response.data);
+                axios.defaults.headers.common = this._getAuthHeader();
                 this.setHeaderLogin();
-
-                axios.defaults.headers.common = {'Authorization': `Bearer ${this.currentUser.token}`}
                 productService.enableButtons();
                 cartService.loadCart();
             })
-            .catch(error => {
-                const data = {
-                    error: "Login failed."
-                };
-
-                templateBuilder.append("error", data, "errors")
-            })
+            .catch(() => showError('Login failed. Check your username and password.'));
     }
 
-    logout()
-    {
+    register(username, password, confirm) {
+        axios.post(`${config.baseUrl}/register`, {
+            username,
+            password,
+            confirmPassword: confirm,
+            role: 'USER'
+        })
+            .then(() => showMessage('Account created! You can now sign in.'))
+            .catch(() => showError('Registration failed. Username may already be taken.'));
+    }
+
+    logout() {
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
         this.currentUser = {};
-
         this.setHeaderLogin();
-
         productService.enableButtons();
         cartService.cart = { items: [], total: 0 };
         cartService.updateCartDisplay();
     }
-
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,69 +1,75 @@
-let templateBuilder = {};
 
-class TemplateBuilder
-{
-    build(templateName, value, target, callback)
-    {
-        axios.get(`templates/${templateName}.html`)
-            .then(response => {
-                try
-                {
-                    const template = response.data;
-                    const html = Mustache.render(template, value);
-                    document.getElementById(target).innerHTML = html;
+class TemplateBuilder {
 
-                    if(callback) callback();
-                }
-                catch(e)
-                {
-                    console.log(e);
+    constructor() {
+        this._cache = {};
+    }
+
+    _fetch(templateName) {
+        if (this._cache[templateName]) {
+            return Promise.resolve(this._cache[templateName]);
+        }
+        return axios.get(`templates/${templateName}.html`).then(response => {
+            this._cache[templateName] = response.data;
+            return response.data;
+        });
+    }
+
+    build(templateName, value, target, callback) {
+        this._fetch(templateName)
+            .then(template => {
+                try {
+                    document.getElementById(target).innerHTML = Mustache.render(template, value);
+                    if (callback) callback();
+                } catch (e) {
+                    console.error(`TemplateBuilder.build error for '${templateName}':`, e);
                 }
             })
+            .catch(e => console.error(`Failed to load template '${templateName}':`, e));
     }
 
-    clear(target)
-    {
-        document.getElementById(target).innerHTML = "";
+    append(templateName, value, target, { ttl } = {}) {
+        this._fetch(templateName)
+            .then(template => {
+                try {
+                    const element = this.createElementFromHTML(Mustache.render(template, value));
+                    const parent = document.getElementById(target);
+                    parent.appendChild(element);
+                    if (ttl) setTimeout(() => {
+                        if (parent.contains(element)) parent.removeChild(element);
+                    }, ttl);
+                } catch (e) {
+                    console.error(`TemplateBuilder.append error for '${templateName}':`, e);
+                }
+            })
+            .catch(e => console.error(`Failed to load template '${templateName}':`, e));
     }
 
-    append(templateName, value, target)
-    {
-        axios.get(`templates/${templateName}.html`)
-             .then(response => {
-                 try
-                 {
-                     const template = response.data;
-                     const html = Mustache.render(template, value);
-
-                     const element = this.createElementFromHTML(html);
-                     const parent = document.getElementById(target);
-                     parent.appendChild(element);
-
-                     if(target == "errors")
-                     {
-                         setTimeout(() => {
-                             parent.removeChild(element);
-                         }, 3000);
-                     }
-                 }
-                 catch(e)
-                 {
-                     console.log(e);
-                 }
-             })
+    clear(target) {
+        document.getElementById(target).innerHTML = '';
     }
 
-    createElementFromHTML(htmlString)
-    {
+    createElementFromHTML(htmlString) {
         const div = document.createElement('div');
         div.innerHTML = htmlString.trim();
-
-        // Change this to div.childNodes to support multiple top-level nodes.
         return div.firstChild;
     }
-
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    templateBuilder = new TemplateBuilder();
-});
+function showError(message) {
+    templateBuilder.append('error', { error: message }, 'errors', { ttl: 3000 });
+}
+
+function showMessage(message) {
+    templateBuilder.append('message', { message }, 'errors', { ttl: 3000 });
+}
+
+function debounce(fn, delay) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
+const templateBuilder = new TemplateBuilder();

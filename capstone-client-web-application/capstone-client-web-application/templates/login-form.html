@@ -1,27 +1,50 @@
-<div id="login-form" class="modal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" >Login</h5>
-        <button type="button" class="btn-close" onclick="hideModalForm()" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true"></span>
-        </button>
+<div class="modal-dialog" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Welcome to A Better Easy Shop</h5>
+      <button type="button" class="btn-close" onclick="hideModalForm()" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">Sign In</div>
+        <div class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">Create Account</div>
       </div>
-      <div class="modal-body">
+
+      <!-- Login pane -->
+      <div id="login-pane" class="auth-pane active">
         <div class="form-floating mb-3">
-          <input type="text" class="form-control" id="username" placeholder="username">
+          <input type="text" class="form-control" id="username" placeholder="username" autocomplete="username">
           <label for="username">Username</label>
         </div>
         <div class="form-floating mb-3">
-          <input type="password" class="form-control" id="password" placeholder="password">
+          <input type="password" class="form-control" id="password" placeholder="password" autocomplete="current-password">
           <label for="password">Password</label>
         </div>
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="btn btn-light" onclick="hideModalForm()">Cancel</button>
+          <button type="button" class="btn btn-primary px-4" onclick="login()">Sign In</button>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="hideModalForm()">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="login()">Login</button>
+
+      <!-- Register pane -->
+      <div id="register-pane" class="auth-pane">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="reg-username" placeholder="username" autocomplete="username">
+          <label for="reg-username">Username</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="password" class="form-control" id="reg-password" placeholder="password" autocomplete="new-password">
+          <label for="reg-password">Password</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="password" class="form-control" id="reg-confirm" placeholder="confirm password" autocomplete="new-password">
+          <label for="reg-confirm">Confirm Password</label>
+        </div>
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="btn btn-light" onclick="hideModalForm()">Cancel</button>
+          <button type="button" class="btn btn-success px-4" onclick="register()">Create Account</button>
+        </div>
       </div>
     </div>
   </div>
-
 </div>

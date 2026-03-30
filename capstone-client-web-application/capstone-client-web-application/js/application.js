@@ -1,126 +1,113 @@
 
-function showLoginForm()
-{
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+function showLoginForm() {
     templateBuilder.build('login-form', {}, 'login');
 }
 
-function hideModalForm()
-{
+function hideModalForm() {
     templateBuilder.clear('login');
 }
 
-function login()
-{
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-pane').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.auth-tab[data-tab="${tab}"]`).classList.add('active');
+    document.getElementById(`${tab}-pane`).classList.add('active');
+}
 
+function login() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    if (!username || !password) { showError('Please enter your username and password.'); return; }
     userService.login(username, password);
-    hideModalForm()
+    hideModalForm();
 }
 
-function showImageDetailForm(product, imageUrl)
-{
-    const imageDetail = {
-        name: product,
-        imageUrl: imageUrl
-    };
-
-    templateBuilder.build('image-detail',imageDetail,'login')
+function register() {
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const confirm  = document.getElementById('reg-confirm').value;
+    if (!username || !password) { showError('Please fill in all fields.'); return; }
+    if (password !== confirm)   { showError('Passwords do not match.'); return; }
+    userService.register(username, password, confirm);
+    hideModalForm();
 }
 
-function loadHome()
-{
-    templateBuilder.build('home',{},'main')
+// ── Navigation ────────────────────────────────────────────────────────────────
 
-    productService.search();
-    categoryService.getAllCategories(loadCategories);
+function showImageDetailForm(product, imageUrl) {
+    templateBuilder.build('image-detail', { name: product, imageUrl }, 'login');
 }
 
-function editProfile()
-{
+// Fix race condition: search and load categories only after 'home' template is
+// injected into the DOM, ensuring #content and #category-select exist.
+function loadHome() {
+    templateBuilder.build('home', {}, 'main', () => {
+        productService.search();
+        categoryService.getAllCategories(loadCategories);
+    });
+}
+
+// ── Profile ───────────────────────────────────────────────────────────────────
+
+function editProfile() {
     profileService.loadProfile();
 }
 
-function saveProfile()
-{
-    const firstName = document.getElementById("firstName").value;
-    const lastName = document.getElementById("lastName").value;
-    const phone = document.getElementById("phone").value;
-    const email = document.getElementById("email").value;
-    const address = document.getElementById("address").value;
-    const city = document.getElementById("city").value;
-    const state = document.getElementById("state").value;
-    const zip = document.getElementById("zip").value;
-
+function saveProfile() {
     const profile = {
-        firstName,
-        lastName,
-        phone,
-        email,
-        address,
-        city,
-        state,
-        zip
+        firstName: document.getElementById('firstName').value,
+        lastName:  document.getElementById('lastName').value,
+        phone:     document.getElementById('phone').value,
+        email:     document.getElementById('email').value,
+        address:   document.getElementById('address').value,
+        city:      document.getElementById('city').value,
+        state:     document.getElementById('state').value,
+        zip:       document.getElementById('zip').value
     };
-
     profileService.updateProfile(profile);
 }
 
-function showCart()
-{
+// ── Cart ──────────────────────────────────────────────────────────────────────
+
+function showCart() {
     cartService.loadCartPage();
 }
 
-function clearCart()
-{
-    cartService.clearCart();
-    cartService.loadCartPage();
-}
+// ── Filters ───────────────────────────────────────────────────────────────────
 
-function setCategory(control)
-{
+function setCategory(control) {
     productService.addCategoryFilter(control.value);
     productService.search();
-
 }
 
-function setColor(control)
-{
+function setColor(control) {
     productService.addColorFilter(control.value);
     productService.search();
-
 }
 
-function setMinPrice(control)
-{
-    const label = document.getElementById("min-price-display")
-    label.innerText = control.value;
+// Unified price-slider handler. Sentinel is the "no filter" default value
+// for each slider (0 for min, 1500 for max). Debounced to avoid firing an
+// API request on every drag tick.
+const _debouncedSearch = debounce(() => productService.search(), 350);
 
-    const value = control.value != 0 ? control.value : "";
-    productService.addMinPriceFilter(value)
-    productService.search();
-
+function _setPriceFilter(control, displayId, sentinel, filterFn) {
+    document.getElementById(displayId).innerText = `$${control.value}`;
+    filterFn(control.value != sentinel ? control.value : '');
+    _debouncedSearch();
 }
 
-function setMaxPrice(control)
-{
-    const label = document.getElementById("max-price-display")
-    label.innerText = control.value;
-
-    const value = control.value != 1500 ? control.value : "";
-    productService.addMaxPriceFilter(value)
-    productService.search();
-
+function setMinPrice(control) {
+    _setPriceFilter(control, 'min-price-display', 0, v => productService.addMinPriceFilter(v));
 }
 
-function closeError(control)
-{
-    setTimeout(() => {
-        control.click();
-    },3000);
+function setMaxPrice(control) {
+    _setPriceFilter(control, 'max-price-display', 1500, v => productService.addMaxPriceFilter(v));
 }
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
-
     loadHome();
 });

@@ -1,16 +1,48 @@
-
-<div class="filter-box">
-  &nbsp;
-
-</div>
+<div class="filter-box"></div>
 <div id="content" class="content-form">
-  <div class="cart-header">
-    <h1>Cart</h1>
-    <button class="btn btn-danger" onclick="clearCart()">Clear</button>
+  {{#isEmpty}}
+  <div class="cart-empty">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <p>Your cart is empty.</p>
+    <button class="btn btn-primary" onclick="loadHome()">Continue Shopping</button>
   </div>
-<div id="cart-item-list">
+  {{/isEmpty}}
+  {{^isEmpty}}
+  <div class="cart-header">
+    <h2>Your Cart</h2>
+    <button class="btn btn-outline-danger btn-sm" onclick="cartService.clearCart()">
+      <i class="fa-solid fa-trash"></i> Clear Cart
+    </button>
+  </div>
+  {{#items}}
+  <div class="cart-item">
+    <img src="/images/products/{{product.imageUrl}}" alt="{{product.name}}"
+         onclick="showImageDetailForm('{{product.name}}', '/images/products/{{product.imageUrl}}')">
+    <div class="item-info">
+      <div class="item-name">{{product.name}}</div>
+      <div class="item-price">${{product.price}} each</div>
+    </div>
+    <div class="qty-controls">
+      <button class="qty-btn" onclick="cartService.updateQuantity({{product.productId}}, {{quantity}} - 1)">
+        <i class="fa-solid fa-minus"></i>
+      </button>
+      <span class="qty-value">{{quantity}}</span>
+      <button class="qty-btn" onclick="cartService.updateQuantity({{product.productId}}, {{quantity}} + 1)">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+    <div class="item-subtotal">${{lineTotal}}</div>
+  </div>
+  {{/items}}
+  <div class="cart-total-row">
+    <span class="label">Total</span>
+    <span class="amount">${{total}}</span>
+  </div>
+  <div class="cart-actions">
+    <button class="btn btn-outline-secondary" onclick="loadHome()">Continue Shopping</button>
+    <button class="btn btn-success px-4" onclick="orderService.placeOrder()">
+      <i class="fa-solid fa-check"></i> Place Order
+    </button>
+  </div>
+  {{/isEmpty}}
 </div>
-
-</div>
-
-

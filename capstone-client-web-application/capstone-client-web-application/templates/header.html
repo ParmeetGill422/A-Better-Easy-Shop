@@ -1,27 +1,28 @@
-
 {{#loggedin}}
 <div id="links">
-    <img src="/images/logo.png" alt="eashshop logo">
-    <a href="#" onclick="loadHome()">Home</a>
-    <a href="#" onclick="editProfile()">Profile</a>
-    <a href="#" onclick="showCart()">View Cart</a>
+    <a href="#" onclick="loadHome(); return false;">
+        <img src="/images/logo.png" alt="A Better Easy Shop">
+    </a>
+    <a href="#" onclick="loadHome(); return false;">Home</a>
+    <a href="#" onclick="editProfile(); return false;">Profile</a>
 </div>
-
-<div>
-    Welcome&nbsp;<span style="font-weight: bold">{{username}}</span>&nbsp;|&nbsp;<a href="#" onclick="userService.logout();return false;">logout</a>
+<div class="header-right">
+    <span>Hello, <span class="username">{{username}}</span></span>
+    <a href="#" onclick="userService.logout(); return false;" class="text-muted" style="font-size:0.85rem;">Sign out</a>
     <div class="cart" onclick="showCart()">
         <i class="fa-solid fa-cart-shopping"></i>
-        <div id="cart-items">0</div>
+        <span id="cart-items">0</span>
     </div>
 </div>
 {{/loggedin}}
 {{#loggedout}}
 <div id="links">
-    <img src="/images/logo.png" alt="eashshop logo">
-    <a href="#" onclick="loadHome()">Home</a>
+    <a href="#" onclick="loadHome(); return false;">
+        <img src="/images/logo.png" alt="A Better Easy Shop">
+    </a>
+    <a href="#" onclick="loadHome(); return false;">Home</a>
 </div>
-
-<div>
-    <a href="#"  onclick="showLoginForm();return false;">login</a>
+<div class="header-right">
+    <a href="#" onclick="showLoginForm(); return false;" class="btn btn-primary btn-sm">Sign In</a>
 </div>
 {{/loggedout}}

@@ -2,145 +2,61 @@ let productService;
 
 class ProductService {
 
-    photos = [];
-
+    photos = new Set();
 
     filter = {
-        cat: undefined,
+        cat:      undefined,
         minPrice: undefined,
         maxPrice: undefined,
-        color: undefined,
-        queryString: () => {
-            let qs = "";
-            if(this.filter.cat){ qs = `cat=${this.filter.cat}`; }
-            if(this.filter.minPrice)
-            {
-                const minP = `minPrice=${this.filter.minPrice}`;
-                if(qs.length>0) {   qs += `&${minP}`; }
-                else { qs = minP; }
-            }
-            if(this.filter.maxPrice)
-            {
-                const maxP = `maxPrice=${this.filter.maxPrice}`;
-                if(qs.length>0) {   qs += `&${maxP}`; }
-                else { qs = maxP; }
-            }
-            if(this.filter.color)
-            {
-                const col = `color=${this.filter.color}`;
-                if(qs.length>0) {   qs += `&${col}`; }
-                else { qs = col; }
-            }
-
-            return qs.length > 0 ? `?${qs}` : "";
-        }
-    }
+        color:    undefined,
+    };
 
     constructor() {
-
-        //load list of photos into memory
-        axios.get("/images/products/photos.json")
-            .then(response => {
-                this.photos = response.data;
-            });
+        axios.get('/images/products/photos.json')
+            .then(response => { this.photos = new Set(response.data); });
     }
 
-    hasPhoto(photo){
-        return this.photos.filter(p => p == photo).length > 0;
+    hasPhoto(photo) {
+        return this.photos.has(photo);
     }
 
-    addCategoryFilter(cat)
-    {
-        if(cat == 0) this.clearCategoryFilter();
-        else this.filter.cat = cat;
-    }
-    addMinPriceFilter(price)
-    {
-        if(price == 0 || price == "") this.clearMinPriceFilter();
-        else this.filter.minPrice = price;
-    }
-    addMaxPriceFilter(price)
-    {
-        if(price == 0 || price == "") this.clearMaxPriceFilter();
-        else this.filter.maxPrice = price;
-    }
-    addColorFilter(color)
-    {
-        if(color == "") this.clearColorFilter();
-        else this.filter.color = color;
+    _queryString() {
+        const params = new URLSearchParams();
+        if (this.filter.cat)      params.set('cat',      this.filter.cat);
+        if (this.filter.minPrice) params.set('minPrice', this.filter.minPrice);
+        if (this.filter.maxPrice) params.set('maxPrice', this.filter.maxPrice);
+        if (this.filter.color)    params.set('color',    this.filter.color);
+        const qs = params.toString();
+        return qs ? `?${qs}` : '';
     }
 
-    clearCategoryFilter()
-    {
-        this.filter.cat = undefined;
-    }
-    clearMinPriceFilter()
-    {
-        this.filter.minPrice = undefined;
-    }
-    clearMaxPriceFilter()
-    {
-        this.filter.maxPrice = undefined;
-    }
-    clearColorFilter()
-    {
-        this.filter.color = undefined;
-    }
+    addCategoryFilter(cat)    { this.filter.cat      = cat  == 0   ? undefined : cat; }
+    addMinPriceFilter(price)  { this.filter.minPrice = price == '' ? undefined : price; }
+    addMaxPriceFilter(price)  { this.filter.maxPrice = price == '' ? undefined : price; }
+    addColorFilter(color)     { this.filter.color    = color == '' ? undefined : color; }
 
-    search()
-    {
-        const url = `${config.baseUrl}/products${this.filter.queryString()}`;
+    search() {
+        const url = `${config.baseUrl}/products${this._queryString()}`;
 
         axios.get(url)
-             .then(response => {
-                 let data = {};
-                 data.products = response.data;
-
-                 data.products.forEach(product => {
-                     if(!this.hasPhoto(product.imageUrl))
-                     {
-                         product.imageUrl = "no-image.jpg";
-                     }
-                 })
-
-                 templateBuilder.build('product', data, 'content', this.enableButtons);
-
-             })
-            .catch(error => {
-
-                const data = {
-                    error: "Searching products failed."
-                };
-
-                templateBuilder.append("error", data, "errors")
-            });
+            .then(response => {
+                const products = response.data.map(p => ({
+                    ...p,
+                    imageUrl: this.hasPhoto(p.imageUrl) ? p.imageUrl : 'no-image.jpg'
+                }));
+                templateBuilder.build('product', { products }, 'content', () => this.enableButtons());
+            })
+            .catch(() => showError('Searching products failed.'));
     }
 
-    enableButtons()
-    {
-        const buttons = [...document.querySelectorAll(".add-button")];
-
-        if(userService.isLoggedIn())
-        {
-            buttons.forEach(button => {
-                button.classList.remove("invisible")
-            });
-        }
-        else
-        {
-            buttons.forEach(button => {
-                button.classList.add("invisible")
-            });
-        }
+    enableButtons() {
+        const loggedIn = userService.isLoggedIn();
+        document.querySelectorAll('.add-button').forEach(btn => {
+            btn.classList.toggle('invisible', !loggedIn);
+        });
     }
-
 }
-
-
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
     productService = new ProductService();
-
 });

@@ -1,42 +1,39 @@
-
-<div class="filter-box">
-  &nbsp;
-
-</div>
+<div class="profile-sidebar"></div>
 <div id="content" class="content-form">
-  <h1>Profile</h1>
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="firstName" value='{{firstName}}'>
-    <label for="firstName">First Name</label>
+  <div class="profile-card">
+    <h2>My Profile</h2>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="firstName" value="{{firstName}}" placeholder="First Name">
+      <label for="firstName">First Name</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="lastName" value="{{lastName}}" placeholder="Last Name">
+      <label for="lastName">Last Name</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="phone" value="{{phone}}" placeholder="Phone">
+      <label for="phone">Phone</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input type="email" class="form-control" id="email" value="{{email}}" placeholder="Email">
+      <label for="email">Email</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="address" value="{{address}}" placeholder="Address">
+      <label for="address">Address</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="city" value="{{city}}" placeholder="City">
+      <label for="city">City</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="state" value="{{state}}" placeholder="State">
+      <label for="state">State</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="zip" value="{{zip}}" placeholder="Zip">
+      <label for="zip">Zip</label>
+    </div>
+    <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
   </div>
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="lastName" value='{{lastName}}'>
-    <label for="lastName">Last Name</label>
-  </div>
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="phone" value='{{phone}}'>
-    <label for="phone">Phone</label>
-  </div>
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="email" value='{{email}}'>
-    <label for="email">Email</label>
-  </div>
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="address" value='{{address}}'>
-    <label for="address">Address</label>
-  </div>
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="city" value='{{city}}'>
-    <label for="city">City</label>
-  </div>
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="state" value='{{state}}'>
-    <label for="state">State</label>
-  </div>
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="zip" value='{{zip}}'>
-    <label for="zip">Zip</label>
-  </div>
-
-  <button class="btn btn-outline-danger" onclick="saveProfile()">Update</button>
 </div>

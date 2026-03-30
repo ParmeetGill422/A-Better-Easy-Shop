@@ -2,23 +2,20 @@ let categoryService;
 
 class CategoryService {
 
+    _cached = null;
 
-    getAllCategories(callback)
-    {
-        const url = `${config.baseUrl}/categories`;
+    getAllCategories(callback) {
+        if (this._cached) {
+            callback(this._cached);
+            return;
+        }
 
-        return axios.get(url)
+        axios.get(`${config.baseUrl}/categories`)
             .then(response => {
-                callback(response.data);
+                this._cached = response.data;
+                callback(this._cached);
             })
-            .catch(error => {
-
-                const data = {
-                    error: "Loading categories failed."
-                };
-
-                templateBuilder.append("error", data, "errors")
-            });
+            .catch(() => showError('Loading categories failed.'));
     }
 }
 
