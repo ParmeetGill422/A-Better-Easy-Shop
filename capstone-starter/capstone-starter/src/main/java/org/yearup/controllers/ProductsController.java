@@ -1,11 +1,12 @@
 package org.yearup.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.yearup.models.DuplicateProduct;
 import org.yearup.models.Product;
 import org.yearup.data.ProductDao;
 
@@ -17,6 +18,8 @@ import java.util.List;
 @CrossOrigin
 public class ProductsController
 {
+    private static final Logger logger = LoggerFactory.getLogger(ProductsController.class);
+
     private ProductDao productDao;
 
     @Autowired
@@ -37,8 +40,13 @@ public class ProductsController
         {
             return productDao.search(categoryId, minPrice, maxPrice, color);
         }
+        catch(ResponseStatusException ex)
+        {
+            throw ex;
+        }
         catch(Exception ex)
         {
+            logger.error("Error searching products", ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
     }
@@ -47,22 +55,16 @@ public class ProductsController
     @PreAuthorize("permitAll()")
     public Product getById(@PathVariable int id )
     {
-        try
-        {
-            var product = productDao.getById(id);
+        var product = productDao.getById(id);
 
-            if(product == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        if(product == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-            return product;
-        }
-        catch(Exception ex)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
-        }
+        return product;
     }
 
     @GetMapping("/duplicates/names")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<String> findDuplicateProductNames() {
         return productDao.findDuplicateProductNames();
     }
@@ -78,6 +80,7 @@ public class ProductsController
         }
         catch(Exception ex)
         {
+            logger.error("Error adding product", ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
     }
@@ -92,6 +95,7 @@ public class ProductsController
         }
         catch(Exception ex)
         {
+            logger.error("Error updating product {}", id, ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
     }
@@ -100,17 +104,18 @@ public class ProductsController
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteProduct(@PathVariable int id)
     {
+        var product = productDao.getById(id);
+
+        if(product == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
         try
         {
-            var product = productDao.getById(id);
-
-            if(product == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
             productDao.delete(id);
         }
         catch(Exception ex)
         {
+            logger.error("Error deleting product {}", id, ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
     }
