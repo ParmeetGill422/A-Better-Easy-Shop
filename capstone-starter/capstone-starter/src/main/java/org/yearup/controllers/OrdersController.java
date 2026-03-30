@@ -1,8 +1,11 @@
 package org.yearup.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.yearup.data.OrderDao;
 import org.yearup.data.ProfileDao;
@@ -23,6 +26,8 @@ import java.util.List;
 @CrossOrigin
 public class OrdersController {
 
+    private static final Logger logger = LoggerFactory.getLogger(OrdersController.class);
+
     private final UserDao userDao;
     private final ProfileDao profileDao;
     private final ShoppingCartDao shoppingCartDao;
@@ -41,18 +46,11 @@ public class OrdersController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Order> createOrder(Principal principal) {
         try {
-            if (principal == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-
             String username = principal.getName();
             User user = userDao.getByUserName(username);
-
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
 
             List<ShoppingCartItem> cartItems = shoppingCartDao.getCartByUserId(user.getId());
             if (cartItems.isEmpty()) {
@@ -85,7 +83,7 @@ public class OrdersController {
             return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to create order for user: {}", principal.getName(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
