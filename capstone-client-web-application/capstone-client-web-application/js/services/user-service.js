@@ -134,12 +134,14 @@ class UserService {
     logout()
     {
         localStorage.removeItem('user');
-        axios.defaults.headers.common = {'Authorization': `bearer ${this.currentUser.token}`}
+        delete axios.defaults.headers.common['Authorization'];
         this.currentUser = {};
 
         this.setHeaderLogin();
 
         productService.enableButtons();
+        cartService.cart = { items: [], total: 0 };
+        cartService.updateCartDisplay();
     }
 
 }

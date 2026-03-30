@@ -93,7 +93,6 @@ function setColor(control)
 
 function setMinPrice(control)
 {
-    // const slider = document.getElementById("min-price");
     const label = document.getElementById("min-price-display")
     label.innerText = control.value;
 
@@ -105,7 +104,6 @@ function setMinPrice(control)
 
 function setMaxPrice(control)
 {
-    // const slider = document.getElementById("min-price");
     const label = document.getElementById("max-price-display")
     label.innerText = control.value;
 
