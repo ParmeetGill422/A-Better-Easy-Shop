@@ -1,3 +1,3 @@
 const config = {
-    baseUrl: 'http://localhost:8080'
+    baseUrl: 'https://a-better-easy-shop-production.up.railway.app'
 }
